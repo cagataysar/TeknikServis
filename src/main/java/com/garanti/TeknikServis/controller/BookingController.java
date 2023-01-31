@@ -3,6 +3,7 @@ import com.garanti.TeknikServis.model.Booking;
 import com.garanti.TeknikServis.model.BookingDTO;
 import com.garanti.TeknikServis.model.Users;
 import com.garanti.TeknikServis.repo.BookingRepo;
+import com.garanti.TeknikServis.response.RestResponse;
 import com.garanti.TeknikServis.service.BookingService;
 import com.garanti.TeknikServis.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -14,14 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -96,6 +90,29 @@ public class BookingController {
         } else {
             return ResponseEntity.internalServerError().body("Başarı ile silinemedi");
         }
+    }
+
+    @GetMapping("getAppointmentsDatesInOrder")
+    @Secured(value = "ROLE_ADMIN")
+    public ResponseEntity getAppointmentsDatesInOrder(@RequestParam(name = "sortType") String type){
+        //http://localhost:9090/appointment/getAppointmentsDatesInOrder?sortType=asc
+        return ResponseEntity.ok(RestResponse.of(appointmentService.getAppointmentsDatesInOrder(type)));
+    }
+
+    //http://localhost:9090/appointment/getAllAppointmentLikeUsername?username=A
+    @GetMapping("getAllAppointmentLikeUsername")
+    @Secured(value = "ROLE_ADMIN")
+    public ResponseEntity getAllAppointmentLikeUsername (@RequestParam(name = "username") String username){
+        return ResponseEntity.ok(RestResponse.of(appointmentService.getAllAppointmentLikeUsername(username)));
+    }
+
+
+
+    @PatchMapping("appointmentIsComplete")
+    @Secured(value = "ROLE_ADMIN")
+    public ResponseEntity<?> appointmentIsComplete(@RequestParam(name = "id") int id, @RequestParam (name = "is_done") boolean is_done){
+        //http://localhost:9090/appointment/appointmentIsComplete?id=1&is_done=true
+        return ResponseEntity.ok(RestResponse.of(appointmentService.appointmentIsComplete(id,is_done)));
     }
 
 
