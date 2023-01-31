@@ -1,4 +1,5 @@
 package com.garanti.TeknikServis.service;
+import com.garanti.TeknikServis.excepton.EntityNoContentException;
 import com.garanti.TeknikServis.model.Booking;
 import com.garanti.TeknikServis.model.BookingDTO;
 import com.garanti.TeknikServis.model.Service;
@@ -64,5 +65,35 @@ private Date createBookingDate(Integer serviceDuration)
     while (duration > 10);
     return sqlDate;
 }
+
+    //http://localhost:9090/booking/getAppointmentsDatesInOrder?sortType=asc
+    public List<Booking> getAppointmentsDatesInOrder(String sortType) {
+        if (sortType.equalsIgnoreCase("DESC") || sortType.equalsIgnoreCase("ASC")) {
+            List<Booking> bookings = appointmentRepo.getAppointmentDatesInOrder(sortType);
+            if (!bookings.isEmpty())
+                return bookings;
+            throw new EntityNoContentException("Listelenecek herhangi bir ürün bulunamadı.");
+        }
+        throw new IllegalArgumentException("Sıralama için verdiğin parametre tipi hatalı.");
+    }
+
+    //http://localhost:9090/booking/getAllAppointmentLikeUsername?username=A
+    public List<Booking> getAllAppointmentLikeUsername(String username) {
+        if (username != null) {
+            List<Booking> bookings = appointmentRepo.getAllAppointmentLikeUsername(username);
+            if (!bookings.isEmpty())
+                return bookings;
+        }
+        throw new EntityNoContentException("Listelenecek herhangi bir ürün bulunamadı.");
+    }
+
+
+
+    public Booking appointmentIsComplete(int id,boolean is_done) {
+        if (appointmentRepo.appointmentIsComplete(id,is_done)) {
+            return appointmentRepo.getBookingById(id);
+            }
+        throw new EntityNoContentException("Listelenecek herhangi bir ürün bulunamadı.");
+    }
 
 }
