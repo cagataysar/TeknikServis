@@ -6,7 +6,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@RequiredArgsConstructor
 public class Sale
 {
     //bu sınıf parametresiz constructor içerir.
@@ -20,6 +19,6 @@ public class Sale
     @NonNull
     private Integer PRODUCT_ID;
     @NonNull
-    private Boolean IS_SOLD;
+    private boolean IS_SOLD;
 
 }
