@@ -23,6 +23,13 @@ public class BookingRepo {
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    public Booking getBookingById(int id)
+    {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("B_ID", id);
+        return namedParameterJdbcTemplate.queryForObject("select * from GARANTI.BOOKING where B_ID = :B_ID", paramMap, BeanPropertyRowMapper.newInstance(Booking.class));
+    }
+
     public BookingDTO getById(int id)
     {
         BookingDTO bookingDTO = null;
@@ -47,10 +54,11 @@ public class BookingRepo {
 
     public boolean save (Booking booking,Date date)
     {
-        String sql = "INSERT INTO BOOKING (NOTE,USER_ID,SERVICE_ID,BOOKING_DATE) values (:NOTE,:USER_ID,:SERVICE_ID,:BOOKING_DATE)";
+        String sql = "INSERT INTO BOOKING (NOTE,USER_ID,SERVICE_ID,BOOKING_DATE, IS_DONE) values (:NOTE,:USER_ID,:SERVICE_ID,:BOOKING_DATE, :IS_DONE)";
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("NOTE", booking.getNOTE());
         paramMap.put("USER_ID", booking.getUSER_ID());
+        paramMap.put("IS_DONE", '0');
         paramMap.put("SERVICE_ID", booking.getSERVICE_ID());
         paramMap.put("BOOKING_DATE", date);
         return  namedParameterJdbcTemplate.update(sql,paramMap)==1;

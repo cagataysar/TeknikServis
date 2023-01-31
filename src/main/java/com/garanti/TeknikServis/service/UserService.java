@@ -42,4 +42,9 @@ public class UserService implements org.springframework.security.core.userdetail
         builder.authorities(roles);
         return builder.build();
     }
+
+    public Users getUserByUsername(String username)
+    {
+        return userRepository.getByUserName(username);
+    }
 }
