@@ -3,6 +3,11 @@ package com.garanti.TeknikServis.controller;
 import com.garanti.TeknikServis.model.Users;
 import com.garanti.TeknikServis.repo.UserRepo;
 import com.garanti.TeknikServis.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,10 +23,19 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
+@Tag (name = "User Table", description = "This class enables to user operations.")
+@SecurityScheme (
+        name = "Bearer Authentication",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        scheme = "bearer"
+)
 public class UserController
 {
     private UserService service;
 
+    @Operation (summary = "This method is to fetch the users from database.")
+    @SecurityRequirement (name = "Bearer Authentication")
     @GetMapping(path = "test")
     @Secured(value = "ROLE_ADMIN")
     public String getByUserName()

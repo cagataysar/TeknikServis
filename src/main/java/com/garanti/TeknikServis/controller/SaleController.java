@@ -4,6 +4,8 @@ import com.garanti.TeknikServis.model.Sale;
 import com.garanti.TeknikServis.response.RestResponse;
 import com.garanti.TeknikServis.service.SaleService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,16 +34,28 @@ import java.util.List;
         scheme = "bearer"
 )
 public class SaleController {
-
     private SaleService service;
 
     public SaleController (SaleService service) {
         this.service = service;
     }
 
+    @Operation(
+            summary = "This is to fetch all the sales stored in database.",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Status code when the operation to be completed successfully.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    )
+            }
+    )
+    @SecurityRequirement(name = "Bearer Authentication")
     @Secured("ROLE_ADMIN")
     @GetMapping ("getAll")
-    @Operation (summary = "This is to fetch all the sales stored in db.")
     public ResponseEntity< List< Sale > > getAll () {
 
         // localhost:9090/sale/getAll
@@ -53,27 +67,33 @@ public class SaleController {
         }
     }
 
+    @Operation (summary = "This method is to delete the sales that saved with ID in database.")
+    @SecurityRequirement(name = "Bearer Authentication")
     @Secured("ROLE_ADMIN")
     @DeleteMapping (path = "delete/{id}")
-    public ResponseEntity< String > deleteById (@PathVariable (value = "id") Integer id) {
+    public ResponseEntity< String > deleteById (
+            @Parameter(name = "SALE ID", required = true)
+            @PathVariable (value = "id") Integer id) {
 
         // localhost:9090/sale/delete/2
         if ( service.deleteById(id) ) {
-            return ResponseEntity.ok("Başarı ile silindi");
+            return ResponseEntity.ok("Successfully saved");
         } else {
-            return ResponseEntity.internalServerError().body("Başarı ile silinemedi!");
+            return ResponseEntity.internalServerError().body("Failed to save successfully!");
         }
     }
 
+    @Operation (summary = "This method is to save the sale to database.", responses = @ApiResponse(responseCode = "201 Created"))
+    @SecurityRequirement(name = "Bearer Authentication")
     @Secured("ROLE_ADMIN")
     @PostMapping (path = "save",consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity< String > save (@RequestBody Sale sale) {
+    public ResponseEntity< String > save ( @RequestBody Sale sale) {
         // localhost:9090/sale/save
         // {"price" : 500,  "note" : "notee note ", "product_ID":1,"is_SOLD": true}
         if ( service.save(sale) ) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("Başarıyla kaydedildi");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Successfully saved");
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Başarıyla kaydedilemedi");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save successfully!");
         }
     }
     // user controller alanı:
@@ -114,6 +134,7 @@ public class SaleController {
     public ResponseEntity getListofSales(){
         return ResponseEntity.ok(RestResponse.of(service.getListofSales()));
     }
+
     @GetMapping("getListofSalesByProduct")
     @Secured(value = "ROLE_USER")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -151,6 +172,7 @@ public class SaleController {
     public ResponseEntity getListofSalesByProduct(@RequestParam(value = "type") String productType){
         return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProduct(productType)));
     }
+
     @GetMapping("getListofSalesByProductId")
     @Secured(value = "ROLE_USER")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -188,6 +210,7 @@ public class SaleController {
     public ResponseEntity getListofSalesByProductId(@RequestParam(value = "product_id") Integer productId){
         return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProductId(productId)));
     }
+
     @PostMapping("buyTheProductInAd")
     @Secured(value = "ROLE_USER")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -222,6 +245,7 @@ public class SaleController {
                     )
             }
     )
+
     public ResponseEntity buyTheProductInAd(@Valid @RequestParam(value = "sale_id" ) Integer id,
                                             @RequestParam(value = "card")   String creditcard,
                                             @RequestHeader(value = "Authorization") HttpHeaders headers){

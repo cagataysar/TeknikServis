@@ -1,8 +1,11 @@
 package com.garanti.TeknikServis.controller;
+
 import com.garanti.TeknikServis.model.Proposal;
 import com.garanti.TeknikServis.response.RestResponse;
 import com.garanti.TeknikServis.service.ProposalService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("proposal")
 @AllArgsConstructor
+@Tag (name = "Proposal Table", description = "This class enables to proposal operations.")
 @SecurityScheme(
         name = "Bearer Authentication",
         type = SecuritySchemeType.HTTP,
@@ -196,6 +201,8 @@ public class ProposalController {
         //http://localhost:9090/proposal/getByApprovedOffers
         return ResponseEntity.ok(RestResponse.of(proposalService.getApprovedOffers(headers)));
     }
+    @Operation (summary = "This method is to fetch the all proposals from database.")
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("getall")
     @Secured(value = "ROLE_ADMIN")
     public ResponseEntity<?> getAll(){
@@ -203,17 +210,21 @@ public class ProposalController {
         return ResponseEntity.ok(RestResponse.of(proposalService.getAll()));
     }
 
+    @Operation (summary = "This method is to fetch the proposals that saved with ID in database.")
+    @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("getById")
     @Secured(value = "ROLE_ADMIN")
-    public ResponseEntity<?> getById(@RequestParam("id") long id){
+    public ResponseEntity<?> getById(@Parameter (name = "PROPOSAL ID", required = true) @RequestParam("id") long id){
         //localhost:9090/proposal/getById?id=1
         return ResponseEntity.ok(proposalService.getById(id));
     }
+    @Operation (summary = "This method is to update the proposals.")
+    @SecurityRequirement(name = "Bearer Authentication")
     @PostMapping("updateById")
     @Secured(value = "ROLE_ADMIN")
-    public ResponseEntity<?> updateById(@RequestParam("id") long id,@RequestParam("approval") boolean approval){
+    public ResponseEntity<?> updateById(@Parameter(name = "Proposal ID", required = true)   @RequestParam("id") long id,
+                                        @Parameter(name = "Is Approved?", required = true) @RequestParam("approval") boolean approval){
         //localhost:9090/proposal/updateById?id=1&approval=true
         return ResponseEntity.ok(proposalService.updateById(id,approval));
     }
-
 }

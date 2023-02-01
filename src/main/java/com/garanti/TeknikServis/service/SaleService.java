@@ -36,6 +36,7 @@ public class SaleService {
             return repository.save(sale);
         }
         catch (Exception e) {
+            System.err.println(e.getMessage());
             return false;
         }
     }
