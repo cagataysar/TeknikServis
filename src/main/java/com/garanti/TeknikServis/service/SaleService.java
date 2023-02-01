@@ -53,6 +53,13 @@ public class SaleService {
             return list;
         throw new EntityNoContentException("Sistemde satışa uygun ürün bulunmamaktadır.");
     }
+
+    public List <SaleDto> getListofSalesByProductId(Integer productID){
+        List<SaleDto> list = repository.getListofSalesByProductId(productID);
+        if(!list.isEmpty() && productID != null)
+            return list;
+        throw new EntityNoContentException("Sistemde satışa uygun ürün bulunmamaktadır.");
+    }
     @Transactional
     public String buyTheProductInAd(Integer id, String creditcard, HttpHeaders headers){
         if(id != null && creditcard != null && creditcard.length() == 16){

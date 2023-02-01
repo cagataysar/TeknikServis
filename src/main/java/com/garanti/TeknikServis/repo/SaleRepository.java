@@ -63,9 +63,23 @@ public class SaleRepository {
     }
     public List <SaleDto> getListofSalesByProduct(String productType){
         String sql = "SELECT S.SALE_ID AS SALE_ID, S.PRICE AS PRICE, S.NOTE AS NOTE, P.NAME AS PRODUCT FROM SALE S\n" +
-                "INNER JOIN PRODUCT P ON P.PRODUCT_ID = S.PRODUCT_ID WHERE P.NAME LIKE :PRODUCT_NAME AND S.IS_SOLD = 0";
+                "INNER JOIN PRODUCT P ON P.PRODUCT_ID = S.PRODUCT_ID WHERE lower(P.NAME) LIKE :PRODUCT_NAME AND S.IS_SOLD = 0";
         Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("PRODUCT_NAME", "%"+productType+"%");
+        paramMap.put("PRODUCT_NAME", "%"+productType.toLowerCase()+"%");
+        RowMapper<SaleDto> rowMapper = new RowMapper<SaleDto>() {
+            @Override
+            public SaleDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new SaleDto(rs.getInt("SALE_ID"), (rs.getDouble("PRICE")+" TL"), rs.getString("NOTE"), rs.getString("PRODUCT"));
+            }
+        };
+        return namedParameterJdbcTemplate.query(sql, paramMap, rowMapper);
+    }
+
+    public List <SaleDto> getListofSalesByProductId(Integer productId){
+        String sql = "SELECT S.SALE_ID AS SALE_ID, S.PRICE AS PRICE, S.NOTE AS NOTE, P.NAME AS PRODUCT FROM SALE S\n" +
+                "INNER JOIN PRODUCT P ON P.PRODUCT_ID = S.PRODUCT_ID WHERE P.PRODUCT_ID = :PRODUCT_ID AND S.IS_SOLD = 0";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("PRODUCT_ID", productId);
         RowMapper<SaleDto> rowMapper = new RowMapper<SaleDto>() {
             @Override
             public SaleDto mapRow(ResultSet rs, int rowNum) throws SQLException {

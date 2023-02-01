@@ -151,6 +151,43 @@ public class SaleController {
     public ResponseEntity getListofSalesByProduct(@RequestParam(value = "type") String productType){
         return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProduct(productType)));
     }
+    @GetMapping("getListofSalesByProductId")
+    @Secured(value = "ROLE_USER")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(
+            summary = "Satışta olan ürünlerin parça tipine göre listesini alabileceğiniz endpoint.",
+            description = "İstekte bulunulduğunda sistemdeki satışa uygun olan ürünlerin parça türüne göre (Like Sorgusu) listesini getirir.",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Başarılı bir şekilde veriler alındığında verilecek response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    ),
+                    @ApiResponse(responseCode = "403",
+                            description = "İstekte bulunmaya yetkiniz yoksa alacağınız response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    ),
+                    @ApiResponse(responseCode = "418",
+                            description = "Sistemde satın alıma uygun ürün bulunmadığında alacağınız response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+
+                    )
+            }
+    )
+    public ResponseEntity getListofSalesByProductId(@RequestParam(value = "product_id") Integer productId){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProductId(productId)));
+    }
     @PostMapping("buyTheProductInAd")
     @Secured(value = "ROLE_USER")
     @SecurityRequirement(name = "Bearer Authentication")

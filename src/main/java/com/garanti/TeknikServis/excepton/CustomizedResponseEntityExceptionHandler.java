@@ -60,7 +60,7 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
         String message = ex.getMessage();
         String detail = webRequest.getDescription(false);
-        return getResponseEntity(message, detail, HttpStatus.NOT_FOUND);
+        return getResponseEntity(message, detail, HttpStatus.I_AM_A_TEAPOT);
     }
 
 
