@@ -2,6 +2,7 @@ package com.garanti.TeknikServis.repo;
 
 import com.garanti.TeknikServis.enumeration.Approval;
 import com.garanti.TeknikServis.model.Proposal;
+import com.garanti.TeknikServis.model.ProposalAdminDto;
 import com.garanti.TeknikServis.model.ProposalDto;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -92,5 +93,38 @@ public class ProposalRepo {
         Map<String,Object> paramMap = new HashMap<>();
         paramMap.put("ID", id);
         return namedParameterJdbcTemplate.queryForObject(sql, paramMap, BeanPropertyRowMapper.newInstance(Proposal.class));
+    }
+    public List<Proposal> getAll(){
+        String sql = "select * from proposal";
+        return jdbcTemplate.query(sql, BeanPropertyRowMapper.newInstance(Proposal.class));
+    }
+
+    public ProposalAdminDto getById(long id){
+        String sql = "SELECT P.NAME,PRP.PRICE,PRP.NOTE FROM PROPOSAL PRP INNER JOIN PRODUCT P ON PRP.PRODUCT_ID = P.PRODUCT_ID WHERE PRP.PRP_ID =:ID ";
+        Map<String,Object> param = new HashMap<>();
+        param.put("ID",id);
+        return namedParameterJdbcTemplate.queryForObject(sql,param,BeanPropertyRowMapper.newInstance(ProposalAdminDto.class));
+    }
+
+    private Proposal getSpecialById(long id){
+        String sql = "SELECT * FROM PROPOSAL WHERE PRP_ID = :ID";
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("ID", id);
+        return namedParameterJdbcTemplate.queryForObject(sql,paramMap,BeanPropertyRowMapper.newInstance(Proposal.class));
+    }
+    public Proposal updateById(long id, int approval){
+        String sql = "UPDATE PROPOSAL SET APPROVAL = :APPROVAL WHERE PRP_ID = :ID";
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("APPROVAL", approval);
+        paramMap.put("ID", id);
+        namedParameterJdbcTemplate.update(sql,paramMap);
+        return getSpecialById(id);
+    }
+    public int infoStatusApproval(long id){
+        String sql = "SELECT APPROVAL FROM PROPOSAL WHERE PRP_ID = :ID";
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("ID", id);
+        return namedParameterJdbcTemplate.queryForObject(sql,paramMap,Integer.class);
+
     }
 }
