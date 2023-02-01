@@ -42,8 +42,19 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
         return getResponseEntity(message, detail, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    @ExceptionHandler
+    public final ResponseEntity<?> handleUnexpectedException(UnexpectedException ex, WebRequest webRequest){
+        String message = ex.getMessage();
+        String detail = webRequest.getDescription(false);
+        return getResponseEntity(message, detail, HttpStatus.I_AM_A_TEAPOT);
+    }
 
-
+    @ExceptionHandler
+    public final ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest webRequest){
+        String message = ex.getMessage();
+        String detail = webRequest.getDescription(false);
+        return getResponseEntity(message, detail, HttpStatus.IM_USED);
+    }
     @ExceptionHandler
     public final ResponseEntity<?> handleItemNotFoundExceptionExceptions(EntityNoContentException ex, WebRequest webRequest){
 
