@@ -4,6 +4,7 @@ package com.garanti.TeknikServis.service;
 import com.garanti.TeknikServis.excepton.EntityNoContentException;
 import com.garanti.TeknikServis.excepton.MultipleProposalCreationException;
 import com.garanti.TeknikServis.model.Proposal;
+import com.garanti.TeknikServis.model.ProposalAdminDto;
 import com.garanti.TeknikServis.model.ProposalDto;
 import com.garanti.TeknikServis.repo.ProposalRepo;
 import com.garanti.TeknikServis.repo.UserRepo;
@@ -58,5 +59,30 @@ public class ProposalService {
             return proposals;
         throw new EntityNoContentException("Sistemde kayıtlı onaylanan teklifiniz bulunmamaktadır.");
     }
+    public List<Proposal> getAll() {
 
+        List<Proposal> bookings = proposalRepo.getAll();
+        if (!bookings.isEmpty())
+            return bookings;
+        throw new EntityNoContentException("Listelenecek herhangi bir ürün bulunamadı.");
+
+    }
+
+    public ProposalAdminDto getById(long id) {
+        return proposalRepo.getById(id);
+
+    }
+
+    public Proposal updateById(long id, boolean approval) {
+        int sayi = proposalRepo.infoStatusApproval(id);
+
+        if (approval) {
+            return proposalRepo.updateById(id, 1);
+        }
+        else{
+            return proposalRepo.updateById(id, 0);
+        }
+
+        // throw new EntityNoContentException("Daha önce işlem gerçekleştirildiğinden işlem gerçekleştirilemiyor.");
+    }
 }

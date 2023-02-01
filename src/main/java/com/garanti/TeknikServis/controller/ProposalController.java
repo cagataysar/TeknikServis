@@ -196,5 +196,24 @@ public class ProposalController {
         //http://localhost:9090/proposal/getByApprovedOffers
         return ResponseEntity.ok(RestResponse.of(proposalService.getApprovedOffers(headers)));
     }
+    @GetMapping("getall")
+    @Secured(value = "ROLE_ADMIN")
+    public ResponseEntity<?> getAll(){
+        //localhost:9090/proposal/getall
+        return ResponseEntity.ok(RestResponse.of(proposalService.getAll()));
+    }
+
+    @GetMapping("getById")
+    @Secured(value = "ROLE_ADMIN")
+    public ResponseEntity<?> getById(@RequestParam("id") long id){
+        //localhost:9090/proposal/getById?id=1
+        return ResponseEntity.ok(proposalService.getById(id));
+    }
+    @PostMapping("updateById")
+    @Secured(value = "ROLE_ADMIN")
+    public ResponseEntity<?> updateById(@RequestParam("id") long id,@RequestParam("approval") boolean approval){
+        //localhost:9090/proposal/updateById?id=1&approval=true
+        return ResponseEntity.ok(proposalService.updateById(id,approval));
+    }
 
 }
