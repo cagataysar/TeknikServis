@@ -1,20 +1,36 @@
 package com.garanti.TeknikServis.controller;
 
 import com.garanti.TeknikServis.model.Sale;
+import com.garanti.TeknikServis.response.RestResponse;
 import com.garanti.TeknikServis.service.SaleService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping (path = "sale")
 @Tag (name = "Sale Table", description = "This class contains information of the sales.")
+@SecurityScheme(
+        name = "Bearer Authentication",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        scheme = "bearer"
+)
 public class SaleController {
 
     private SaleService service;
@@ -59,5 +75,119 @@ public class SaleController {
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Başarıyla kaydedilemedi");
         }
+    }
+    // user controller alanı:
+    @GetMapping("getListofSales")
+    @Secured(value = "ROLE_USER")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(
+            summary = "Satışta olan ürünlerin listesini alan endpoint.",
+            description = "İstekte bulunulduğunda sistemdeki satışa uygun olan ürünlerin tüm listesini getirir.",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Başarılı bir şekilde veriler alındığında verilecek response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    ),
+                    @ApiResponse(responseCode = "403",
+                            description = "İstekte bulunmaya yetkiniz yoksa alacağınız response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    ),
+                    @ApiResponse(responseCode = "418",
+                            description = "Sistemde satın alıma uygun ürün bulunmadığında alacağınız response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+
+                    )
+            }
+    )
+    public ResponseEntity getListofSales(){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSales()));
+    }
+    @GetMapping("getListofSalesByProduct")
+    @Secured(value = "ROLE_USER")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(
+            summary = "Satışta olan ürünlerin parça tipine göre listesini alabileceğiniz endpoint.",
+            description = "İstekte bulunulduğunda sistemdeki satışa uygun olan ürünlerin parça türüne göre (Like Sorgusu) listesini getirir.",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Başarılı bir şekilde veriler alındığında verilecek response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    ),
+                    @ApiResponse(responseCode = "403",
+                            description = "İstekte bulunmaya yetkiniz yoksa alacağınız response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    ),
+                    @ApiResponse(responseCode = "418",
+                            description = "Sistemde satın alıma uygun ürün bulunmadığında alacağınız response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+
+                    )
+            }
+    )
+    public ResponseEntity getListofSalesByProduct(@RequestParam(value = "type") String productType){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProduct(productType)));
+    }
+    @PostMapping("buyTheProductInAd")
+    @Secured(value = "ROLE_USER")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @Operation(
+            summary = "Satışta olan ürünlerin alım işlemi için kullanılır.",
+            description = "İstekte bulunulduğunda sistemdeki satışa uygun olan ürünlerin tüm listesini getirir.",
+            responses = {
+                    @ApiResponse(responseCode = "200",
+                            description = "Başarılı bir şekilde veriler alındığında verilecek response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    ),
+                    @ApiResponse(responseCode = "403",
+                            description = "İstekte bulunmaya yetkiniz yoksa alacağınız response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+                    ),
+                    @ApiResponse(responseCode = "418",
+                            description = "Sistemde satın almaya uygun ürün bulunmadığında alacağınız response status kodu.",
+                            content = {
+                                    @Content(
+                                            mediaType = "application/json",
+                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
+                            }
+
+                    )
+            }
+    )
+    public ResponseEntity buyTheProductInAd(@Valid @RequestParam(value = "sale_id" ) Integer id,
+                                            @RequestParam(value = "card")   String creditcard,
+                                            @RequestHeader(value = "Authorization") HttpHeaders headers){
+        return ResponseEntity.ok(RestResponse.of(service.buyTheProductInAd(id,creditcard,headers)));
     }
 }
