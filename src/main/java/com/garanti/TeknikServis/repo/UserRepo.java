@@ -44,6 +44,12 @@ public class UserRepo
         return roles;
     }
 
+    public int getUserId(String username){
+        String sql = "SELECT USER_ID FROM USERS WHERE USERNAME = :USERNAME";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("USERNAME", username);
+        return namedParameterJdbcTemplate.queryForObject(sql,paramMap,Integer.class);
+    }
 
     @Transactional
     public boolean save(Users customUser)
