@@ -62,7 +62,15 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         String detail = webRequest.getDescription(false);
         return getResponseEntity(message, detail, HttpStatus.I_AM_A_TEAPOT);
     }
-
+    @ExceptionHandler
+    public final ResponseEntity<?> handleMultipleProposalCreationException(MultipleProposalCreationException ex, WebRequest webRequest){
+        String message = ex.getMessage();
+        String detail = webRequest.getDescription(false);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/YYYY HH:mm:ss");
+        Date errorDate = new Date();
+        RestErrorResponse restErrorResponse = new RestErrorResponse(sdf.format(errorDate), message, detail);
+        return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).body(restErrorResponse);
+    }
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
