@@ -6,10 +6,12 @@ import com.garanti.TeknikServis.model.Service;
 import com.garanti.TeknikServis.repo.BookingRepo;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
 
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 
 @org.springframework.stereotype.Service
@@ -17,6 +19,8 @@ import java.util.List;
 public class BookingService {
     @NonNull
     private BookingRepo appointmentRepo;
+    @NonNull
+    private MessageSource messageSource;
 
 
     public boolean deleteById(int id)
@@ -67,33 +71,33 @@ private Date createBookingDate(Integer serviceDuration)
 }
 
     //http://localhost:9090/booking/getAppointmentsDatesInOrder?sortType=asc
-    public List<Booking> getAppointmentsDatesInOrder(String sortType) {
+    public List<Booking> getAppointmentsDatesInOrder(String sortType, Locale locale) {
         if (sortType.equalsIgnoreCase("DESC") || sortType.equalsIgnoreCase("ASC")) {
             List<Booking> bookings = appointmentRepo.getAppointmentDatesInOrder(sortType);
             if (!bookings.isEmpty())
                 return bookings;
-            throw new EntityNoContentException("Listelenecek herhangi bir ürün bulunamadı.");
+            throw new EntityNoContentException(messageSource.getMessage("booking.no.content", null, locale));
         }
-        throw new IllegalArgumentException("Sıralama için verdiğin parametre tipi hatalı.");
+        throw new IllegalArgumentException(messageSource.getMessage("booking.wrong.sort.parameter", null, locale));
     }
 
     //http://localhost:9090/booking/getAllAppointmentLikeUsername?username=A
-    public List<Booking> getAllAppointmentLikeUsername(String username) {
+    public List<Booking> getAllAppointmentLikeUsername(String username, Locale locale) {
         if (username != null) {
             List<Booking> bookings = appointmentRepo.getAllAppointmentLikeUsername(username);
             if (!bookings.isEmpty())
                 return bookings;
         }
-        throw new EntityNoContentException("Listelenecek herhangi bir ürün bulunamadı.");
+        throw new EntityNoContentException(messageSource.getMessage("booking.no.content", null, locale));
     }
 
 
 
-    public Booking appointmentIsComplete(int id,boolean is_done) {
+    public Booking appointmentIsComplete(int id,boolean is_done, Locale locale) {
         if (appointmentRepo.appointmentIsComplete(id,is_done)) {
             return appointmentRepo.getBookingById(id);
             }
-        throw new EntityNoContentException("Listelenecek herhangi bir ürün bulunamadı.");
+        throw new EntityNoContentException(messageSource.getMessage("booking.no.content", null, locale));
     }
 
 }

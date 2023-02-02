@@ -6,6 +6,7 @@ import com.garanti.TeknikServis.repo.BookingRepo;
 import com.garanti.TeknikServis.response.RestResponse;
 import com.garanti.TeknikServis.service.BookingService;
 import com.garanti.TeknikServis.service.UserService;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.util.Locale;
 
 @RestController
 @RequestMapping(path = "appointment")
@@ -29,10 +31,13 @@ public class BookingController {
     private BookingRepo appointmentRepo;
     private UserService userService;
 
-    public BookingController(BookingService appointmentService, BookingRepo appointmentRepo, UserService userService) {
+    private MessageSource messageSource;
+
+    public BookingController(BookingService appointmentService, BookingRepo appointmentRepo, UserService userService, MessageSource messageSource) {
         this.appointmentService=appointmentService;
         this.appointmentRepo=appointmentRepo;
         this.userService = userService;
+        this.messageSource= messageSource;
     }
 
     @PreAuthorize(value = "isAuthenticated()")
@@ -49,25 +54,24 @@ public class BookingController {
 
 
     @PostMapping(path = "save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> save(@RequestBody Booking booking)
+    public ResponseEntity<String> save(@RequestBody Booking booking,@RequestHeader(name="Accept-Language", required = false) Locale locale)
     {
         // {"note":"Formatlamaistiyorum", "user_ID":2, "service_ID":3}
         //localhost:9090/appointment/save
 
         if (appointmentService.save(booking))
         {
-
-            return ResponseEntity.status(HttpStatus.CREATED).body("Kaydınız oluşturulmuştur.Kayıt numaranız: "+appointmentRepo.getNextId()+"dır.Lütfen kaybetmeyiniz.!");
+            return ResponseEntity.status(HttpStatus.CREATED).body(messageSource.getMessage("booking.save.success",null, locale)+ appointmentRepo.getNextId());
         }
         else
         {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Kaydınızda bir sorun oluştu. Lütfen yeniden kayıt oluşturunuz.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(messageSource.getMessage("booking.save.fail",null, locale));
         }
     }
 
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping(path = "deleteById/{id}")
-    public ResponseEntity<String> deleteById(Authentication auth, @PathVariable(value = "id") Integer id) {
+    public ResponseEntity<String> deleteById(Authentication auth, @PathVariable(value = "id") Integer id,@RequestHeader(name = "Accept-Language", required = false) Locale locale) {
         // http://localhost:9090/appointment/deleteById/12
         if (auth.isAuthenticated())
         {
@@ -82,37 +86,37 @@ public class BookingController {
         Users usr = userService.getUserByUsername(username);
         if (!usr.getUSER_ID().equals(appointmentRepo.getBookingById(id).getUSER_ID()))
         {
-            return ResponseEntity.badRequest().body("Bu kayıt size ait değildir !!!");
+            return ResponseEntity.badRequest().body(messageSource.getMessage("booking.wrong.user",null,locale));
         }
 
         if (appointmentService.deleteById(id)) {
-            return ResponseEntity.ok("Başarı ile silindi");
+            return ResponseEntity.ok(messageSource.getMessage("booking.delete.success",null,locale));
         } else {
-            return ResponseEntity.internalServerError().body("Başarı ile silinemedi");
+            return ResponseEntity.internalServerError().body(messageSource.getMessage("booking.delete.fail", null, locale));
         }
     }
 
     @GetMapping("getAppointmentsDatesInOrder")
     @Secured(value = "ROLE_ADMIN")
-    public ResponseEntity getAppointmentsDatesInOrder(@RequestParam(name = "sortType") String type){
+    public ResponseEntity getAppointmentsDatesInOrder(@RequestParam(name = "sortType") String type,@RequestHeader(name = "Accept-Language", required = false) Locale locale){
         //http://localhost:9090/appointment/getAppointmentsDatesInOrder?sortType=asc
-        return ResponseEntity.ok(RestResponse.of(appointmentService.getAppointmentsDatesInOrder(type)));
+        return ResponseEntity.ok(RestResponse.of(appointmentService.getAppointmentsDatesInOrder(type, locale)));
     }
 
     //http://localhost:9090/appointment/getAllAppointmentLikeUsername?username=A
     @GetMapping("getAllAppointmentLikeUsername")
     @Secured(value = "ROLE_ADMIN")
-    public ResponseEntity getAllAppointmentLikeUsername (@RequestParam(name = "username") String username){
-        return ResponseEntity.ok(RestResponse.of(appointmentService.getAllAppointmentLikeUsername(username)));
+    public ResponseEntity getAllAppointmentLikeUsername (@RequestParam(name = "username") String username, @RequestHeader(name = "Accept-Language", required = false)Locale locale){
+        return ResponseEntity.ok(RestResponse.of(appointmentService.getAllAppointmentLikeUsername(username, locale)));
     }
 
 
 
     @PatchMapping("appointmentIsComplete")
     @Secured(value = "ROLE_ADMIN")
-    public ResponseEntity<?> appointmentIsComplete(@RequestParam(name = "id") int id, @RequestParam (name = "is_done") boolean is_done){
+    public ResponseEntity<?> appointmentIsComplete(@RequestParam(name = "id") int id, @RequestParam (name = "is_done") boolean is_done,@RequestHeader(name = "Accept-Language", required = false) Locale locale){
         //http://localhost:9090/appointment/appointmentIsComplete?id=1&is_done=true
-        return ResponseEntity.ok(RestResponse.of(appointmentService.appointmentIsComplete(id,is_done)));
+        return ResponseEntity.ok(RestResponse.of(appointmentService.appointmentIsComplete(id,is_done, locale)));
     }
 
 

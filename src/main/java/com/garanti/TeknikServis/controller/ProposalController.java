@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Locale;
+
 @RestController
 @RequestMapping("proposal")
 @AllArgsConstructor
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class ProposalController {
     private ProposalService proposalService;
+
 
     @PostMapping(path = "save")
     @Secured(value = "ROLE_USER")
@@ -69,9 +72,9 @@ public class ProposalController {
                     )
             }
     )
-    public ResponseEntity save(@RequestBody Proposal proposal, @RequestHeader(value = "Authorization") HttpHeaders headers){
+    public ResponseEntity save(@RequestBody Proposal proposal, @RequestHeader(value = "Authorization") HttpHeaders headers,@RequestHeader(name = "Accept-Language", required = false) Locale locale){
         //http://localhost:9090/proposal/save
-        return ResponseEntity.ok(RestResponse.of(proposalService.save(proposal, headers)));
+        return ResponseEntity.ok(RestResponse.of(proposalService.save(proposal, headers, locale)));
     }
     @DeleteMapping(path = "deleteByProposalId")
     @Secured(value = "ROLE_USER")
@@ -115,10 +118,10 @@ public class ProposalController {
                     )
             }
     )
-    public ResponseEntity deleteByProposalId(@RequestParam(value ="proposalID") Integer proposalID,
-                                             @RequestHeader(value = "Authorization") HttpHeaders headers){
+    public ResponseEntity deleteByProposalId(@RequestHeader(name = "Accept-Language", required = false)@RequestParam(value ="proposalID") Integer proposalID,
+                                             @RequestHeader(value = "Authorization") HttpHeaders headers, Locale locale){
         //http://localhost:9090/proposal/deleteByProposalId?proposalID=
-        return ResponseEntity.ok(RestResponse.of(proposalService.deleteByProposalId(proposalID,headers)));
+        return ResponseEntity.ok(RestResponse.of(proposalService.deleteByProposalId(proposalID,headers, locale)));
     }
     @GetMapping(path = "getByUserOffers")
     @Secured(value = "ROLE_USER")
@@ -154,9 +157,9 @@ public class ProposalController {
                     )
             }
     )
-    public ResponseEntity getByUserOffers(@RequestHeader(value = "Authorization") HttpHeaders headers){
+    public ResponseEntity getByUserOffers(@RequestHeader(value = "Authorization") HttpHeaders headers,@RequestHeader(name = "Accept-Language", required = false) Locale locale){
         //http://localhost:9090/proposal/getByUserOffers
-        return ResponseEntity.ok(RestResponse.of(proposalService.getByUserOffers(headers)));
+        return ResponseEntity.ok(RestResponse.of(proposalService.getByUserOffers(headers, locale)));
     }
     @GetMapping(path = "getByApprovedOffers")
     @Secured(value = "ROLE_USER")
@@ -192,15 +195,15 @@ public class ProposalController {
                     )
             }
     )
-    public ResponseEntity getByApprovedOffers(@RequestHeader(value = "Authorization") HttpHeaders headers){
+    public ResponseEntity getByApprovedOffers(@RequestHeader(value = "Authorization") HttpHeaders headers,@RequestHeader(name = "Accept-Language", required = false) Locale locale){
         //http://localhost:9090/proposal/getByApprovedOffers
-        return ResponseEntity.ok(RestResponse.of(proposalService.getApprovedOffers(headers)));
+        return ResponseEntity.ok(RestResponse.of(proposalService.getApprovedOffers(headers, locale)));
     }
     @GetMapping("getall")
     @Secured(value = "ROLE_ADMIN")
-    public ResponseEntity<?> getAll(){
+    public ResponseEntity<?> getAll(@RequestHeader(name = "Accept-Language", required = false) Locale locale){
         //localhost:9090/proposal/getall
-        return ResponseEntity.ok(RestResponse.of(proposalService.getAll()));
+        return ResponseEntity.ok(RestResponse.of(proposalService.getAll(locale)));
     }
 
     @GetMapping("getById")
