@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping (path = "sale")
@@ -34,9 +36,11 @@ import java.util.List;
 public class SaleController {
 
     private SaleService service;
+    private MessageSource messageSource;
 
-    public SaleController (SaleService service) {
+    public SaleController (SaleService service, MessageSource messageSource) {
         this.service = service;
+        this.messageSource= messageSource;
     }
 
     @Secured("ROLE_ADMIN")
@@ -55,25 +59,25 @@ public class SaleController {
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping (path = "delete/{id}")
-    public ResponseEntity< String > deleteById (@PathVariable (value = "id") Integer id) {
+    public ResponseEntity< String > deleteById (@PathVariable (value = "id") Integer id,@RequestHeader(name = "Accept-Language", required = false) Locale locale) {
 
         // localhost:9090/sale/delete/2
         if ( service.deleteById(id) ) {
-            return ResponseEntity.ok("Başarı ile silindi");
+            return ResponseEntity.ok(messageSource.getMessage("sale.admin.delete.success", null, locale));
         } else {
-            return ResponseEntity.internalServerError().body("Başarı ile silinemedi!");
+            return ResponseEntity.internalServerError().body(messageSource.getMessage("sale.admin.delete.fail", null, locale));
         }
     }
 
     @Secured("ROLE_ADMIN")
     @PostMapping (path = "save",consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity< String > save (@RequestBody Sale sale) {
+    public ResponseEntity< String > save (@RequestBody Sale sale,@RequestHeader(name = "Accept-Language", required = false) Locale locale) {
         // localhost:9090/sale/save
         // {"price" : 500,  "note" : "notee note ", "product_ID":1,"is_SOLD": true}
         if ( service.save(sale) ) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("Başarıyla kaydedildi");
+            return ResponseEntity.status(HttpStatus.CREATED).body(messageSource.getMessage("sale.admin.save.success", null, locale));
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Başarıyla kaydedilemedi");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(messageSource.getMessage("sale.admin.save.fail", null, locale));
         }
     }
     // user controller alanı:
@@ -111,8 +115,8 @@ public class SaleController {
                     )
             }
     )
-    public ResponseEntity getListofSales(){
-        return ResponseEntity.ok(RestResponse.of(service.getListofSales()));
+    public ResponseEntity getListofSales(@RequestHeader(name = "Accept-Language", required = false) Locale locale){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSales(locale)));
     }
     @GetMapping("getListofSalesByProduct")
     @Secured(value = "ROLE_USER")
@@ -148,8 +152,8 @@ public class SaleController {
                     )
             }
     )
-    public ResponseEntity getListofSalesByProduct(@RequestParam(value = "type") String productType){
-        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProduct(productType)));
+    public ResponseEntity getListofSalesByProduct(@RequestParam(value = "type") String productType, @RequestHeader(name = "Accept-Language", required = false) Locale locale){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProduct(productType, locale)));
     }
     @GetMapping("getListofSalesByProductId")
     @Secured(value = "ROLE_USER")
@@ -185,8 +189,8 @@ public class SaleController {
                     )
             }
     )
-    public ResponseEntity getListofSalesByProductId(@RequestParam(value = "product_id") Integer productId){
-        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProductId(productId)));
+    public ResponseEntity getListofSalesByProductId(@RequestParam(value = "product_id") Integer productId, @RequestHeader(name = "Accept-Language", required = false) Locale locale){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProductId(productId, locale)));
     }
     @PostMapping("buyTheProductInAd")
     @Secured(value = "ROLE_USER")
@@ -224,7 +228,8 @@ public class SaleController {
     )
     public ResponseEntity buyTheProductInAd(@Valid @RequestParam(value = "sale_id" ) Integer id,
                                             @RequestParam(value = "card")   String creditcard,
-                                            @RequestHeader(value = "Authorization") HttpHeaders headers){
-        return ResponseEntity.ok(RestResponse.of(service.buyTheProductInAd(id,creditcard,headers)));
+                                            @RequestHeader(value = "Authorization") HttpHeaders headers,
+                                            @RequestHeader(name = "Accept-Language", required = false) Locale locale){
+        return ResponseEntity.ok(RestResponse.of(service.buyTheProductInAd(id,creditcard,headers,locale)));
     }
 }
