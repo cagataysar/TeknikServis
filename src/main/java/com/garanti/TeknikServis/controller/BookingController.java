@@ -6,6 +6,7 @@ import com.garanti.TeknikServis.repo.BookingRepo;
 import com.garanti.TeknikServis.response.RestResponse;
 import com.garanti.TeknikServis.service.BookingService;
 import com.garanti.TeknikServis.service.UserService;
+import com.garanti.TeknikServis.validation.BookingValidator;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,14 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
-import java.security.Principal;
 import java.util.Locale;
 
 @RestController
@@ -33,11 +30,14 @@ public class BookingController {
 
     private MessageSource messageSource;
 
-    public BookingController(BookingService appointmentService, BookingRepo appointmentRepo, UserService userService, MessageSource messageSource) {
+    private BookingValidator bookingValidator;
+
+    public BookingController(BookingService appointmentService, BookingRepo appointmentRepo, UserService userService, MessageSource messageSource, BookingValidator bookingValidator) {
         this.appointmentService=appointmentService;
         this.appointmentRepo=appointmentRepo;
         this.userService = userService;
         this.messageSource= messageSource;
+        this.bookingValidator = bookingValidator;
     }
 
     @PreAuthorize(value = "isAuthenticated()")
@@ -54,10 +54,16 @@ public class BookingController {
 
 
     @PostMapping(path = "save", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> save(@RequestBody Booking booking,@RequestHeader(name="Accept-Language", required = false) Locale locale)
+    public ResponseEntity save(@Validated @RequestBody Booking booking, BindingResult result, @RequestHeader(name="Accept-Language", required = false) Locale locale)
     {
         // {"note":"Formatlamaistiyorum", "user_ID":2, "service_ID":3}
         //localhost:9090/appointment/save
+
+        bookingValidator.validate(booking, result);
+
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
 
         if (appointmentService.save(booking))
         {

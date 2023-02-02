@@ -2,6 +2,7 @@ package com.garanti.TeknikServis.controller;
 import com.garanti.TeknikServis.model.Proposal;
 import com.garanti.TeknikServis.response.RestResponse;
 import com.garanti.TeknikServis.service.ProposalService;
+import com.garanti.TeknikServis.validation.ProposalValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,6 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +39,7 @@ import java.util.Locale;
 )
 public class ProposalController {
     private ProposalService proposalService;
+    private ProposalValidator proposalValidator;
 
 
     @PostMapping(path = "save")
@@ -72,8 +76,14 @@ public class ProposalController {
                     )
             }
     )
-    public ResponseEntity save(@RequestBody Proposal proposal, @RequestHeader(value = "Authorization") HttpHeaders headers,@RequestHeader(name = "Accept-Language", required = false) Locale locale){
+    public ResponseEntity save(@Validated BindingResult result, @RequestBody Proposal proposal, @RequestHeader(value = "Authorization") HttpHeaders headers, @RequestHeader(name = "Accept-Language", required = false) Locale locale){
         //http://localhost:9090/proposal/save
+
+        proposalValidator.validate(proposal, result);
+
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
+        }
         return ResponseEntity.ok(RestResponse.of(proposalService.save(proposal, headers, locale)));
     }
     @DeleteMapping(path = "deleteByProposalId")
