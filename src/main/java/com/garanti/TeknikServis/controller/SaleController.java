@@ -26,7 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping (path = "sale")
-@Tag (name = "Sale Table", description = "This class contains information of the sales.")
+@Tag (name = "Sale Service", description = "This class contains information of the sales.")
 @SecurityScheme(
         name = "Bearer Authentication",
         type = SecuritySchemeType.HTTP,

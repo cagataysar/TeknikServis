@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@Tag (name = "User Table", description = "This class enables to user operations.")
+@Tag (name = "User Service", description = "This class enables to user operations.")
 @SecurityScheme (
         name = "Bearer Authentication",
         type = SecuritySchemeType.HTTP,

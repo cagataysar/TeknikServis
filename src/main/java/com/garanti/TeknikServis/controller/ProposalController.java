@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("proposal")
 @AllArgsConstructor
-@Tag (name = "Proposal Table", description = "This class enables to proposal operations.")
+@Tag (name = "Proposal Service", description = "This class enables to proposal operations.")
 @SecurityScheme(
         name = "Bearer Authentication",
         type = SecuritySchemeType.HTTP,

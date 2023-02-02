@@ -30,7 +30,7 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping(path = "appointment")
-@Tag (name = "Booking Table", description = "This class enables to appointment operations.")
+@Tag (name = "Booking Service", description = "This class enables to appointment operations.")
 @SecurityScheme (
         name = "Bearer Authentication",
         type = SecuritySchemeType.HTTP,
