@@ -5,7 +5,6 @@ import com.garanti.TeknikServis.response.RestResponse;
 import com.garanti.TeknikServis.service.SaleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequestMapping (path = "sale")
@@ -34,28 +35,19 @@ import java.util.List;
         scheme = "bearer"
 )
 public class SaleController {
-    private SaleService service;
 
-    public SaleController (SaleService service) {
+    private SaleService service;
+    private MessageSource messageSource;
+
+    public SaleController (SaleService service, MessageSource messageSource) {
         this.service = service;
+        this.messageSource= messageSource;
     }
 
-    @Operation(
-            summary = "This is to fetch all the sales stored in database.",
-            responses = {
-                    @ApiResponse(responseCode = "200",
-                            description = "Status code when the operation to be completed successfully.",
-                            content = {
-                                    @Content(
-                                            mediaType = "application/json",
-                                            array = @ArraySchema(schema = @Schema(implementation = RestResponse.class)))
-                            }
-                    )
-            }
-    )
     @SecurityRequirement(name = "Bearer Authentication")
     @Secured("ROLE_ADMIN")
     @GetMapping ("getAll")
+    @Operation (summary  = "This is to fetch all the sales stored in db.")
     public ResponseEntity< List< Sale > > getAll () {
 
         // localhost:9090/sale/getAll
@@ -71,15 +63,13 @@ public class SaleController {
     @SecurityRequirement(name = "Bearer Authentication")
     @Secured("ROLE_ADMIN")
     @DeleteMapping (path = "delete/{id}")
-    public ResponseEntity< String > deleteById (
-            @Parameter(name = "SALE ID", required = true)
-            @PathVariable (value = "id") Integer id) {
+    public ResponseEntity< String > deleteById (@Parameter(name = "SALE ID", required = true)@PathVariable (value = "id") Integer id,@RequestHeader(name = "Accept-Language", required = false) Locale locale) {
 
         // localhost:9090/sale/delete/2
         if ( service.deleteById(id) ) {
-            return ResponseEntity.ok("Successfully saved");
+            return ResponseEntity.ok(messageSource.getMessage("sale.admin.delete.success", null, locale));
         } else {
-            return ResponseEntity.internalServerError().body("Failed to save successfully!");
+            return ResponseEntity.internalServerError().body(messageSource.getMessage("sale.admin.delete.fail", null, locale));
         }
     }
 
@@ -87,13 +77,13 @@ public class SaleController {
     @SecurityRequirement(name = "Bearer Authentication")
     @Secured("ROLE_ADMIN")
     @PostMapping (path = "save",consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity< String > save ( @RequestBody Sale sale) {
+    public ResponseEntity< String > save (@RequestBody Sale sale,@RequestHeader(name = "Accept-Language", required = false) Locale locale) {
         // localhost:9090/sale/save
         // {"price" : 500,  "note" : "notee note ", "product_ID":1,"is_SOLD": true}
         if ( service.save(sale) ) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("Successfully saved");
+            return ResponseEntity.status(HttpStatus.CREATED).body(messageSource.getMessage("sale.admin.save.success", null, locale));
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to save successfully!");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(messageSource.getMessage("sale.admin.save.fail", null, locale));
         }
     }
     // user controller alanı:
@@ -131,8 +121,8 @@ public class SaleController {
                     )
             }
     )
-    public ResponseEntity getListofSales(){
-        return ResponseEntity.ok(RestResponse.of(service.getListofSales()));
+    public ResponseEntity getListofSales(@RequestHeader(name = "Accept-Language", required = false) Locale locale){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSales(locale)));
     }
 
     @GetMapping("getListofSalesByProduct")
@@ -169,8 +159,8 @@ public class SaleController {
                     )
             }
     )
-    public ResponseEntity getListofSalesByProduct(@RequestParam(value = "type") String productType){
-        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProduct(productType)));
+    public ResponseEntity getListofSalesByProduct(@RequestParam(value = "type") String productType, @RequestHeader(name = "Accept-Language", required = false) Locale locale){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProduct(productType, locale)));
     }
 
     @GetMapping("getListofSalesByProductId")
@@ -207,8 +197,8 @@ public class SaleController {
                     )
             }
     )
-    public ResponseEntity getListofSalesByProductId(@RequestParam(value = "product_id") Integer productId){
-        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProductId(productId)));
+    public ResponseEntity getListofSalesByProductId(@RequestParam(value = "product_id") Integer productId, @RequestHeader(name = "Accept-Language", required = false) Locale locale){
+        return ResponseEntity.ok(RestResponse.of(service.getListofSalesByProductId(productId, locale)));
     }
 
     @PostMapping("buyTheProductInAd")
@@ -248,7 +238,8 @@ public class SaleController {
 
     public ResponseEntity buyTheProductInAd(@Valid @RequestParam(value = "sale_id" ) Integer id,
                                             @RequestParam(value = "card")   String creditcard,
-                                            @RequestHeader(value = "Authorization") HttpHeaders headers){
-        return ResponseEntity.ok(RestResponse.of(service.buyTheProductInAd(id,creditcard,headers)));
+                                            @RequestHeader(value = "Authorization") HttpHeaders headers,
+                                            @RequestHeader(name = "Accept-Language", required = false) Locale locale){
+        return ResponseEntity.ok(RestResponse.of(service.buyTheProductInAd(id,creditcard,headers,locale)));
     }
 }

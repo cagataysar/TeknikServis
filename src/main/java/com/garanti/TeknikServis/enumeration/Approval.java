@@ -29,4 +29,13 @@ public enum Approval {
         }
         return null;
     }
+
+    public static boolean isValid(int code) {
+        for (Approval approval : Approval.values()) {
+            if (approval.getValue() == code) {
+                return approval.getValue()==code;
+            }
+        }
+        return false;
+    }
 }
