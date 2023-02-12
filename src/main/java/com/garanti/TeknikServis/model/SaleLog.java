@@ -3,6 +3,7 @@ package com.garanti.TeknikServis.model;
 import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,7 +23,7 @@ public class SaleLog
     @NonNull
     private String INFO;
     @NonNull
-    private Timestamp SALE_LOG_DATE;
+    private LocalDateTime SALE_LOG_DATE;
     @NonNull
     private String CREDIT_CARD;
 

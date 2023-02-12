@@ -2,6 +2,7 @@ package com.garanti.TeknikServis.model;
 
 import lombok.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 
 
@@ -22,7 +23,7 @@ public class Booking
     private Integer USER_ID;
     @NonNull
     private Integer SERVICE_ID;
-    private Boolean IS_DONE;
-    private LocalDate BOOKING_DATE;
+    private boolean IS_DONE;
+    private Date BOOKING_DATE;
 
 }

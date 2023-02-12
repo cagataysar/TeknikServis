@@ -24,11 +24,12 @@ Insert into USERS (USER_ID,USERNAME,PASSWORD,USER_EMAIL) values ('2','user','$2a
 
 --for Role
 DELETE FROM ROLE;
-Insert into ROLE (NAME) values ('ADMIN');
-Insert into ROLE (NAME) values ('USER');
+Insert into ROLE (NAME) values ('ROLE_ADMIN');
+Insert into ROLE (NAME) values ('ROLE_USER');
 
 -- for User_Roles
 delete from USER_ROLES;
-Insert into USER_ROLES (ROLE,USER_ID) values ('ADMIN','1');
-Insert into USER_ROLES (ROLE,USER_ID) values ('USER','2');
+Insert into USER_ROLES (ROLE,USER_ID) values ('ROLE_ADMIN','1');
+Insert into USER_ROLES (ROLE,USER_ID) values ('ROLE_USER','2');
 
+COMMIT;

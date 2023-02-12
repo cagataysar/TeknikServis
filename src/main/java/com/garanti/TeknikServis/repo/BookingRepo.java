@@ -6,10 +6,13 @@ import com.garanti.TeknikServis.model.Service;
 import lombok.AllArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +25,13 @@ public class BookingRepo {
     private JdbcTemplate jdbcTemplate;
 
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    public Booking getBookingById(int id)
+    {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("B_ID", id);
+        return namedParameterJdbcTemplate.queryForObject("select * from GARANTI.BOOKING where B_ID = :B_ID", paramMap, BeanPropertyRowMapper.newInstance(Booking.class));
+    }
 
     public BookingDTO getById(int id)
     {
@@ -47,10 +57,11 @@ public class BookingRepo {
 
     public boolean save (Booking booking,Date date)
     {
-        String sql = "INSERT INTO BOOKING (NOTE,USER_ID,SERVICE_ID,BOOKING_DATE) values (:NOTE,:USER_ID,:SERVICE_ID,:BOOKING_DATE)";
+        String sql = "INSERT INTO BOOKING (NOTE,USER_ID,SERVICE_ID,BOOKING_DATE, IS_DONE) values (:NOTE,:USER_ID,:SERVICE_ID,:BOOKING_DATE, :IS_DONE)";
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("NOTE", booking.getNOTE());
         paramMap.put("USER_ID", booking.getUSER_ID());
+        paramMap.put("IS_DONE", '0');
         paramMap.put("SERVICE_ID", booking.getSERVICE_ID());
         paramMap.put("BOOKING_DATE", date);
         return  namedParameterJdbcTemplate.update(sql,paramMap)==1;
@@ -82,4 +93,40 @@ public class BookingRepo {
         paramMap.put("NEW_DATE",new_date);
         return namedParameterJdbcTemplate.query(sql, paramMap, BeanPropertyRowMapper.newInstance(Service.class));
     }
+
+    public List<Booking> getAppointmentDatesInOrder(String sortType) {
+        String sql = "SELECT * FROM BOOKING ORDER BY BOOKING_DATE " + sortType;
+        RowMapper<Booking> rowMapper = new RowMapper<Booking>() {
+            @Override
+            public Booking mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new Booking(rs.getInt("B_ID"), rs.getString("NOTE"), rs.getInt("USER_ID"), rs.getInt("SERVICE_ID"), rs.getBoolean("IS_DONE"), rs.getDate("BOOKING_DATE"));
+            }
+        };
+        return namedParameterJdbcTemplate.query(sql, rowMapper);
+    }
+
+    public List<Booking> getAllAppointmentLikeUsername(String username) {
+        String sql = "SELECT B.B_ID, B.NOTE, B.USER_ID, B.SERVICE_ID, B.IS_DONE, B.BOOKING_DATE FROM BOOKING B \n" +
+                "INNER JOIN USERS U ON U.USER_ID = B.USER_ID WHERE U.USERNAME LIKE :USERNAME AND IS_DONE = 1";
+        RowMapper<Booking> rowMapper = new RowMapper<Booking>() {
+            @Override
+            public Booking mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new Booking(rs.getInt("B_ID"), rs.getString("NOTE"), rs.getInt("USER_ID"),
+                        rs.getInt("SERVICE_ID"), rs.getBoolean("IS_DONE"), rs.getDate("BOOKING_DATE"));
+            }
+        };
+
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("USERNAME", "%" + username + "%");
+        return namedParameterJdbcTemplate.query(sql, paramMap, rowMapper);
+    }
+    public boolean appointmentIsComplete(int id,boolean is_done) {
+        String sql = "UPDATE BOOKING SET IS_DONE = :ID WHERE B_ID = :RANDEVU_ID";
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("RANDEVU_ID", id);
+        paramMap.put("ID",is_done ? '1' : '0');
+        return namedParameterJdbcTemplate.update(sql, paramMap) == 1;
+    }
+
+
 }
