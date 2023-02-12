@@ -3,13 +3,15 @@ package com.garanti.TeknikServis.config;
 import com.garanti.TeknikServis.security.JWTAuthenticationFilter;
 import com.garanti.TeknikServis.security.JWTAuthorizationFilter;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
-@EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+//@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
+@Profile("default")
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
     @Override
